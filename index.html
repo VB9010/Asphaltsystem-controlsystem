@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aszfaltkeverő - Fejlett Irányítástechnikai és Gépészeti Rendszer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+            color: #333;
+            overflow-x: auto;
+            min-height: 100vh;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(44, 62, 80, 0.95));
+            color: white;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(52, 73, 94, 0.9));
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tab-button {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            font-weight: bold;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
+            transition: all 0.4s ease;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .tab-button:hover {
+            background: linear-gradient(135deg, #34495e, #3b5998);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .tab-button:hover::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.5);
+            transform: scale(1.05);
+        }
+
+        .content {
+            flex: 1;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            margin: 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #3498db;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .dashboard-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .status-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .status-normal { border-left-color: #27ae60; background: rgba(39, 174, 96, 0.1); }
+        .status-warning { border-left-color: #f39c12; background: rgba(243, 156, 18, 0.1); }
+        .status-critical { border-left-color: #e74c3c; background: rgba(231, 76, 60, 0.1); }
+
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn-primary { background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        /* Alert System */
+        .alert-system {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .alert {
+            background: #27ae60;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+            transform: translateX(450px);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert.show {
+            transform: translateX(0);
+        }
+
+        .alert.warning { background: #f39c12; }
+        .alert.error { background: #e74c3c; }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0;
+            background: rgba(255,255,255,0.2);
+            transition: width 3s linear;
+        }
+
+        .alert.show::before {
+            width: 100%;
+        }
+
+        /* Real-time Data Panel */
+        .realtime-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            min-width: 280px;
+            transition: all 0.3s ease;
+        }
+
+        .realtime-panel.collapsed {
+            transform: translateX(calc(100% - 60px));
+        }
+
+        .panel-toggle {
+            position: absolute;
+            left: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #e74c3c;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 5px 0 0 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .realtime-data {
+            display: grid;
+            gap: 8px;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .data-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .indicator-green { background: #27ae60; }
+        .indicator-yellow { background: #f39c12; }
+        .indicator-red { background: #e74c3c; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Process Flow Visualization */
+        .process-flow {
+            display: none;
+            position: relative;
+            height: 600px;
+            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+            border-radius: 15px;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .process-step {
+            position: absolute;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .process-step:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .process-step.active {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.5);
+        }
+
+        .flow-arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid #34495e;
+        }
+
+        /* Equipment Status */
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .equipment-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .equipment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .equipment-icon {
+            font-size: 2em;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .equipment-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .equipment-status {
+            font-size: 0.9em;
+            padding: 3px 8px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .status-running { background: #d5f4e6; color: #27ae60; }
+        .status-warning { background: #fef5e7; color: #f39c12; }
+        .status-stopped { background: #fadbd8; color: #e74c3c; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab-button {
+                width: 90%;
+                margin: 5px 0;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .realtime-panel {
+                position: relative;
+                bottom: auto;
+                right: auto;
+                margin: 20px;
+                width: calc(100% - 40px);
+            }
+            
+            .realtime-panel.collapsed {
+                transform: none;
+            }
+            
+            .panel-toggle {
+                display: none;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .control-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Animations */
+        .rotating {
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pulsing {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px #3498db; }
+            to { box-shadow: 0 0 30px #e74c3c; }
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .progress-fill.warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .progress-fill.danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ Aszfaltkeverő Berendezés</h1>
+            <p>Fejlett Irányítástechnikai és Gépészeti Rendszer - Enhanced Version</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab-button active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-button" onclick="showTab('monitoring')">📱 Monitoring</button>
+            <button class="tab-button" onclick="showTab('process')">🔄 Folyamat</button>
+            <button class="tab-button" onclick="showTab('equipment')">⚙️ Berendezések</button>
+            <button class="tab-button" onclick="showTab('analytics')">📈 Analitika</button>
+            <button class="tab-button" onclick="showTab('maintenance')">🔧 Karbantartás</button>
+            <button class="tab-button" onclick="showTab('settings')">⚙️ Beállítások</button>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <h2>🎯 Rendszer áttekintés</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>🔥 Hőmérséklet rendszer</h3>
+                        <div class="status-grid">
+                            <div class="status-item status-normal">
+                                <span>Szárító hőmérséklet</span>
+                                <span class="status-value" id="dash-dryer-temp">185°C</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Keverő hőmérséklet</span>
+                                <span class="status-value" id="dash-mixer-temp">165°C</span>
+                            </div>
+                            <div class="status-item status-warning">
+                                <span>Bitumen hőmérséklet</span>
+                                <span class="status-value" id="dash-bitumen-temp">158°C</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>⚡ Teljesítmény</h3>
+                        <div class="status-grid">
+                            <div class="status-item status-normal">
+                                <span>Termelési arány</span>
+                                <span class="status-value" id="dash-production">98.5 t/h</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Energiafogyasztás</span>
+                                <span class="status-value" id="dash-power">1.8 MW</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Hatékonyság</span>
+                                <span class="status-value" id="dash-efficiency">94%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>📦 Tárolók állapota</h3>
+                        <div class="status-grid">
+                            <div class="status-item status-normal">
+                                <span>Zúzalék 0-4mm</span>
+                                <div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 78%"></div>
+                                    </div>
+                                    <span class="status-value">78%</span>
+                                </div>
+                            </div>
+                            <div class="status-item status-warning">
+                                <span>Mészkőliszt</span>
+                                <div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill warning" style="width: 23%"></div>
+                                    </div>
+                                    <span class="status-value">23%</span>
+                                </div>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Bitumen</span>
+                                <div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 65%"></div>
+                                    </div>
+                                    <span class="status-value">65%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>🚨 Rendszer státusz</h3>
+                        <div class="status-grid">
+                            <div class="status-item status-normal">
+                                <span>PLC kommunikáció</span>
+                                <span class="status-value">✅ OK</span>
+                            </div>
+                            <div class="status-item status-warning">
+                                <span>Aktív riasztások</span>
+                                <span class="status-value">⚠️ 2</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Üzemóra</span>
+                                <span class="status-value">1,247 h</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>📈 Valós idejű trendek</h3>
+                    <canvas id="dashboardChart" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="control-panel">
+                    <h3>🎮 Gyorsvezérlés</h3>
+                    <div class="control-buttons">
+                        <button class="control-btn btn-primary" onclick="quickStart()">
+                            ▶️ Gyors indítás
+                        </button>
+                        <button class="control-btn btn-warning" onclick="quickStop()">
+                            ⏸️ Szünet
+                        </button>
+                        <button class="control-btn btn-danger" onclick="emergencyStop()">
+                            🚨 Vészleállítás
+                        </button>
+                        <button class="control-btn btn-primary" onclick="autoMode()">
+                            🤖 Auto mód
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monitoring Tab -->
+            <div id="monitoring" class="tab-content">
+                <h2>📱 Valós idejű monitoring</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>🌡️ Hőmérséklet monitoring</h3>
+                        <div id="temp-sensors">
+                            <!-- Temperature sensors will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>⚙️ Motor teljesítmény</h3>
+                        <div id="motor-status">
+                            <!-- Motor status will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>⏲️ Nyomás rendszer</h3>
+                        <div id="pressure-sensors">
+                            <!-- Pressure sensors will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>📊 Produkciós adatok</h3>
+                        <div id="production-data">
+                            <!-- Production data will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>📈 Részletes trend analízis</h3>
+                    <canvas id="monitoringChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Process Tab -->
+            <div id="process" class="tab-content">
+                <h2>🔄 Technológiai folyamat</h2>
+                
+                <div class="process-flow">
+                    <div class="process-step active" style="top: 50px; left: 50px;" onclick="selectProcess(1)">
+                        <div>📦</div>
+                        <div>Tárolók</div>
+                        <div style="font-size: 0.8em;">6 × 150t</div>
+                    </div>
+                    
+                    <div class="flow-arrow" style="top: 70px; left: 200px; transform: rotate(90deg);"></div>
+                    
+                    <div class="process-step" style="top: 150px; left: 50px;" onclick="selectProcess(2)">
+                        <div>⚖️</div>
+                        <div>Adagolás</div>
+                        <div style="font-size: 0.8em;">±0.5%</div>
+                    </div>
+                    
+                    <div class="flow-arrow" style="top: 170px; left: 200px;"></div>
+                    
+                    <div class="process-step" style="top: 150px; left: 300px;" onclick="selectProcess(3)">
+                        <div>🔥</div>
+                        <div>Szárítás</div>
+                        <div style="font-size: 0.8em;">180°C</div>
+                    </div>
+                    
+                    <div class="flow-arrow" style="top: 170px; left: 450px;"></div>
+                    
+                    <div class="process-step" style="top: 150px; left: 550px;" onclick="selectProcess(4)">
+                        <div>🥄</div>
+                        <div>Keverés</div>
+                        <div style="font-size: 0.8em;">90 sec</div>
+                    </div>
+                    
+                    <div class="flow-arrow" style="top: 170px; left: 700px;"></div>
+                    
+                    <div class="process-step" style="top: 150px; left: 800px;" onclick="selectProcess(5)">
+                        <div>📦</div>
+                        <div>Kirakás</div>
+                        <div style="font-size: 0.8em;">165°C</div>
+                    </div>
+                    
+                    <div style="position: absolute; bottom: 50px; left: 50px; background: rgba(255,255,255,0.9); padding: 20px; border-radius: 10px; width: 300px;">
+                        <h4 id="process-title">Folyamat információ</h4>
+                        <p id="process-description">Válasszon egy folyamat lépést a részletekért</p>
+                        <div id="process-params"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equipment Tab -->
+            <div id="equipment" class="tab-content">
+                <h2>⚙️ Berendezések állapota</h2>
+                
+                <div class="equipment-grid" id="equipment-grid">
+                    <!-- Equipment cards will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics" class="tab-content">
+                <h2>📈 Analitika és jelentések</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>📊 Napi teljesítmény</h3>
+                        <div class="status-grid">
+                            <div class="status-item status-normal">
+                                <span>Mai termelés</span>
+                                <span class="status-value">2,365 t</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Heti átlag</span>
+                                <span class="status-value">2,280 t/nap</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Havi cél</span>
+                                <span class="status-value">85%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>🔍 Minőségi mutatók</h3>
+                        <div class="status-grid">
+                            <div class="status-item status-normal">
+                                <span>Hőmérséklet pontosság</span>
+                                <span class="status-value">±2°C</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Keverési egyenletesség</span>
+                                <span class="status-value">98.5%</span>
+                            </div>
+                            <div class="status-item status-warning">
+                                <span>Bitumen tartalom eltérés</span>
+                                <span class="status-value">±0.3%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>⚡ Energia hatékonyság</h3>
+                        <div class="status-grid">
+                            <div class="status-item status-normal">
+                                <span>Energia/tonna</span>
+                                <span class="status-value">18.5 kWh</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Gázfogyasztás</span>
+                                <span class="status-value">42 m³/t</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>CO₂ emisszió</span>
+                                <span class="status-value">95 kg/t</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>🔧 Karbantartási KPI</h3>
+                        <div class="status-grid">
+                            <div class="status-item status-normal">
+                                <span>Rendelkezésre állás</span>
+                                <span class="status-value">97.8%</span>
+                            </div>
+                            <div class="status-item status-warning">
+                                <span>Következő karbantartás</span>
+                                <span class="status-value">85 óra</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>MTBF</span>
+                                <span class="status-value">850 óra</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>📈 Hosszú távú trendek</h3>
+                    <canvas id="analyticsChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Maintenance Tab -->
+            <div id="maintenance" class="tab-content">
+                <h2>🔧 Karbantartás és diagnosztika</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>📅 Ütemezett karbantartások</h3>
+                        <div id="maintenance-schedule">
+                            <div class="status-item status-warning">
+                                <span>Szárító motor - Csapágycsere</span>
+                                <span class="status-value">3 nap</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Keverő lapátok - Vizsgálat</span>
+                                <span class="status-value">2 hét</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Szűrőrendszer - Tisztítás</span>
+                                <span class="status-value">5 nap</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>🔍 Prediktív diagnosztika</h3>
+                        <div id="predictive-diagnostics">
+                            <div class="status-item status-normal">
+                                <span>Vibráció analízis</span>
+                                <span class="status-value">✅ Normál</span>
+                            </div>
+                            <div class="status-item status-warning">
+                                <span>Hőképi analízis</span>
+                                <span class="status-value">⚠️ Figyelés</span>
+                            </div>
+                            <div class="status-item status-normal">
+                                <span>Olaj analízis</span>
+                                <span class="status-value">✅ Megfelelő</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>📊 Alkatrész állapot</h3>
+                        <div id="parts-condition">
+                            <div class="status-item">
+                                <span>Keverőlapátok kopása</span>
+                                <div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill warning" style="width: 65%"></div>
+                                    </div>
+                                    <span class="status-value">65%</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <span>Szűrőzsákok állapota</span>
+                                <div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 85%"></div>
+                                    </div>
+                                    <span class="status-value">85%</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <span>Égetőfej állapota</span>
+                                <div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 92%"></div>
+                                    </div>
+                                    <span class="status-value">92%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <h2>⚙️ Rendszer beállítások</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>🌡️ Hőmérséklet setpointok</h3>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span>Szárító célhőmérséklet</span>
+                                <input type="number" value="180" min="150" max="200" style="width: 80px; padding: 5px;">
+                                <span>°C</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Keverő célhőmérséklet</span>
+                                <input type="number" value="165" min="150" max="180" style="width: 80px; padding: 5px;">
+                                <span>°C</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Bitumen hőmérséklet</span>
+                                <input type="number" value="160" min="140" max="170" style="width: 80px; padding: 5px;">
+                                <span>°C</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>⚖️ Adagolási receptek</h3>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span>Zúzalék 0-4mm</span>
+                                <input type="number" value="35" min="0" max="50" style="width: 60px; padding: 5px;">
+                                <span>%</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Zúzalék 4-8mm</span>
+                                <input type="number" value="30" min="0" max="50" style="width: 60px; padding: 5px;">
+                                <span>%</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Bitumen tartalom</span>
+                                <input type="number" value="5.5" min="4" max="7" step="0.1" style="width: 60px; padding: 5px;">
+                                <span>%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>⚡ Motor beállítások</h3>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span>Szárító dob fordulatszám</span>
+                                <input type="number" value="8" min="5" max="12" style="width: 60px; padding: 5px;">
+                                <span>rpm</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Keverő fordulatszám</span>
+                                <input type="number" value="45" min="30" max="60" style="width: 60px; padding: 5px;">
+                                <span>rpm</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Keverési idő</span>
+                                <input type="number" value="90" min="60" max="120" style="width: 60px; padding: 5px;">
+                                <span>sec</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>🚨 Riasztási határok</h3>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span>Hőmérséklet tolerancia</span>
+                                <input type="number" value="5" min="2" max="10" style="width: 60px; padding: 5px;">
+                                <span>°C</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Nyomás minimum</span>
+                                <input type="number" value="7.0" min="6" max="8" step="0.1" style="width: 60px; padding: 5px;">
+                                <span>bar</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Termelés minimum</span>
+                                <input type="number" value="90" min="80" max="100" style="width: 60px; padding: 5px;">
+                                <span>t/h</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <h3>💾 Konfiguráció mentés</h3>
+                    <div class="control-buttons">
+                        <button class="control-btn btn-primary" onclick="saveSettings()">
+                            💾 Beállítások mentése
+                        </button>
+                        <button class="control-btn btn-warning" onclick="loadDefaults()">
+                            🔄 Alapértelmezett
+                        </button>
+                        <button class="control-btn btn-primary" onclick="exportConfig()">
+                            📤 Konfiguráció export
+                        </button>
+                        <button class="control-btn btn-primary" onclick="importConfig()">
+                            📥 Konfiguráció import
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Data Panel -->
+    <div class="realtime-panel" id="realtimePanel">
+        <button class="panel-toggle" onclick="togglePanel()">📊</button>
+        <h4 style="margin-bottom: 15px; color: #00d4ff;">📈 Valós idejű adatok</h4>
+        <div class="realtime-data" id="realtimeData">
+            <!-- Real-time data will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Alert System -->
+    <div class="alert-system" id="alertSystem">
+        <!-- Alerts will be dynamically added here -->
+    </div>
+
+    <script>
+        // Global variables
+        let systemData = {
+            temperature: {
+                dryer: 185,
+                mixer: 165,
+                bitumen: 158
+            },
+            production: 98.5,
+            power: 1.8,
+            efficiency: 94,
+            gasPresssure: 7.2,
+            storage: {
+                aggregate04: 78,
+                limestone: 23,
+                bitumen: 65
+            },
+            motors: {
+                dryer: { power: 132, current: 98, status: 'running' },
+                mixer: { power: 250, current: 187, status: 'running' },
+                conveyor: { power: 45, current: 35, status: 'running' }
+            },
+            operatingHours: 1247
+        };
+
+        let charts = {};
+        let updateIntervals = [];
+
+        // Initialize system
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSystem();
+            startRealTimeUpdates();
+            populateEquipmentGrid();
+            updateAllDisplays();
+        });
+
+        function initializeSystem() {
+            console.log('🚀 Aszfaltkeverő rendszer inicializálása...');
+            showAlert('✅ Rendszer sikeresen inicializálva', 'success');
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.id === 'process') {
+                    tab.querySelector('.process-flow').style.display = 'none';
+                }
+            });
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName);
+            selectedTab.classList.add('active');
+            
+            if (tabName === 'process') {
+                selectedTab.querySelector('.process-flow').style.display = 'block';
+            }
+
+            // Activate button
+            event.target.classList.add('active');
+
+            // Initialize charts for specific tabs
+            if (tabName === 'dashboard' && !charts.dashboard) {
+                setTimeout(() => initDashboardChart(), 100);
+            } else if (tabName === 'monitoring' && !charts.monitoring) {
+                setTimeout(() => initMonitoringChart(), 100);
+            } else if (tabName === 'analytics' && !charts.analytics) {
+                setTimeout(() => initAnalyticsChart(), 100);
+            }
+        }
+
+        function startRealTimeUpdates() {
+            const interval = setInterval(() => {
+                updateSystemData();
+                updateAllDisplays();
+                updateRealTimePanel();
+            }, 2000);
+            updateIntervals.push(interval);
+        }
+
+        function updateSystemData() {
+            // Simulate real-time data changes
+            systemData.temperature.dryer += (Math.random() - 0.5) * 2;
+            systemData.temperature.mixer += (Math.random() - 0.5) * 1.5;
+            systemData.temperature.bitumen += (Math.random() - 0.5) * 1;
+            systemData.gasPresssure += (Math.random() - 0.5) * 0.2;
+            systemData.production += (Math.random() - 0.5) * 1.5;
+            systemData.power += (Math.random() - 0.5) * 0.1;
+            systemData.efficiency += (Math.random() - 0.5) * 0.5;
+
+            // Apply constraints
+            systemData.temperature.dryer = Math.max(175, Math.min(195, systemData.temperature.dryer));
+            systemData.temperature.mixer = Math.max(160, Math.min(175, systemData.temperature.mixer));
+            systemData.temperature.bitumen = Math.max(150, Math.min(170, systemData.temperature.bitumen));
+            systemData.gasPresssure = Math.max(6.8, Math.min(8.2, systemData.gasPresssure));
+            systemData.production = Math.max(85, Math.min(110, systemData.production));
+            systemData.power = Math.max(1.5, Math.min(2.2, systemData.power));
+            systemData.efficiency = Math.max(88, Math.min(98, systemData.efficiency));
+
+            // Update motor currents based on load
+            systemData.motors.dryer.current = 70 + (systemData.production - 85) * 1.2;
+            systemData.motors.mixer.current = 150 + (systemData.production - 85) * 1.5;
+            systemData.motors.conveyor.current = 25 + (systemData.production - 85) * 0.4;
+
+            checkAlerts();
+        }
+
+        function updateAllDisplays() {
+            // Update dashboard displays
+            updateElement('dash-dryer-temp', systemData.temperature.dryer.toFixed(1) + '°C');
+            updateElement('dash-mixer-temp', systemData.temperature.mixer.toFixed(1) + '°C');
+            updateElement('dash-bitumen-temp', systemData.temperature.bitumen.toFixed(1) + '°C');
+            updateElement('dash-production', systemData.production.toFixed(1) + ' t/h');
+            updateElement('dash-power', systemData.power.toFixed(1) + ' MW');
+            updateElement('dash-efficiency', systemData.efficiency.toFixed(0) + '%');
+
+            // Update monitoring displays
+            updateMonitoringDisplays();
+        }
+
+        function updateElement(id, value) {
+            const element = document.getElementById(id);
+            if (element) element.textContent = value;
+        }
+
+        function updateMonitoringDisplays() {
+            // Temperature sensors
+            const tempSensors = document.getElementById('temp-sensors');
+            if (tempSensors) {
+                tempSensors.innerHTML = `
+                    <div class="status-item ${getTemperatureStatus('dryer')}">
+                        <span>🌡️ Szárító TT-01</span>
+                        <span class="status-value">${systemData.temperature.dryer.toFixed(1)}°C</span>
+                    </div>
+                    <div class="status-item ${getTemperatureStatus('mixer')}">
+                        <span>🌡️ Keverő TT-02</span>
+                        <span class="status-value">${systemData.temperature.mixer.toFixed(1)}°C</span>
+                    </div>
+                    <div class="status-item ${getTemperatureStatus('bitumen')}">
+                        <span>🌡️ Bitumen TT-03</span>
+                        <span class="status-value">${systemData.temperature.bitumen.toFixed(1)}°C</span>
+                    </div>
+                `;
+            }
+
+            // Motor status
+            const motorStatus = document.getElementById('motor-status');
+            if (motorStatus) {
+                motorStatus.innerHTML = `
+                    <div class="status-item status-normal">
+                        <span>⚙️ Szárító motor</span>
+                        <span class="status-value">${systemData.motors.dryer.current.toFixed(0)}A</span>
+                    </div>
+                    <div class="status-item status-normal">
+                        <span>⚙️ Keverő motor</span>
+                        <span class="status-value">${systemData.motors.mixer.current.toFixed(0)}A</span>
+                    </div>
+                    <div class="status-item status-normal">
+                        <span>⚙️ Szállító motor</span>
+                        <span class="status-value">${systemData.motors.conveyor.current.toFixed(0)}A</span>
+                    </div>
+                `;
+            }
+
+            // Pressure sensors
+            const pressureSensors = document.getElementById('pressure-sensors');
+            if (pressureSensors) {
+                pressureSensors.innerHTML = `
+                    <div class="status-item ${getPressureStatus()}">
+                        <span>⏲️ Gáznyomás PT-01</span>
+                        <span class="status-value">${systemData.gasPresssure.toFixed(1)} bar</span>
+                    </div>
+                    <div class="status-item status-normal">
+                        <span>⏲️ Pneumatikus PT-02</span>
+                        <span class="status-value">7.8 bar</span>
+                    </div>
+                    <div class="status-item status-normal">
+                        <span>⏲️ Hidraulikus PT-03</span>
+                        <span class="status-value">210 bar</span>
+                    </div>
+                `;
+            }
+
+            // Production data
+            const productionData = document.getElementById('production-data');
+            if (productionData) {
+                productionData.innerHTML = `
+                    <div class="status-item status-normal">
+                        <span>📊 Termelési arány</span>
+                        <span class="status-value">${systemData.production.toFixed(1)} t/h</span>
+                    </div>
+                    <div class="status-item status-normal">
+                        <span>⚡ Teljesítményfelvétel</span>
+                        <span class="status-value">${systemData.power.toFixed(1)} MW</span>
+                    </div>
+                    <div class="status-item status-normal">
+                        <span>🎯 Hatékonyság</span>
+                        <span class="status-value">${systemData.efficiency.toFixed(0)}%</span>
+                    </div>
+                `;
+            }
+        }
+
+        function getTemperatureStatus(type) {
+            const temp = systemData.temperature[type];
+            const thresholds = {
+                dryer: { min: 175, max: 190 },
+                mixer: { min: 160, max: 170 },
+                bitumen: { min: 155, max: 165 }
+            };
+            
+            const threshold = thresholds[type];
+            if (temp < threshold.min || temp > threshold.max) {
+                return 'status-warning';
+            }
+            return 'status-normal';
+        }
+
+        function getPressureStatus() {
+            return systemData.gasPresssure < 7.0 ? 'status-critical' : 
+                   systemData.gasPresssure < 7.5 ? 'status-warning' : 'status-normal';
+        }
+
+        function updateRealTimePanel() {
+            const panel = document.getElementById('realtimeData');
+            if (panel) {
+                panel.innerHTML = `
+                    <div class="data-row">
+                        <span><span class="data-indicator indicator-${getIndicatorColor('dryer')}"></span>Szárító:</span>
+                        <span>${systemData.temperature.dryer.toFixed(1)}°C</span>
+                    </div>
+                    <div class="data-row">
+                        <span><span class="data-indicator indicator-${getIndicatorColor('mixer')}"></span>Keverő:</span>
+                        <span>${systemData.temperature.mixer.toFixed(1)}°C</span>
+                    </div>
+                    <div class="data-row">
+                        <span><span class="data-indicator indicator-${getIndicatorColor('pressure')}"></span>Gáznyomás:</span>
+                        <span>${systemData.gasPresssure.toFixed(1)} bar</span>
+                    </div>
+                    <div class="data-row">
+                        <span><span class="data-indicator indicator-green"></span>Termelés:</span>
+                        <span>${systemData.production.toFixed(1)} t/h</span>
+                    </div>
+                    <div class="data-row">
+                        <span><span class="data-indicator indicator-green"></span>Üzemóra:</span>
+                        <span>${systemData.operatingHours} h</span>
+                    </div>
+                `;
+            }
+        }
+
+        function getIndicatorColor(type) {
+            switch(type) {
+                case 'dryer':
+                    return getTemperatureStatus('dryer') === 'status-normal' ? 'green' : 'yellow';
+                case 'mixer':
+                    return getTemperatureStatus('mixer') === 'status-normal' ? 'green' : 'yellow';
+                case 'pressure':
+                    return getPressureStatus() === 'status-normal' ? 'green' : 
+                           getPressureStatus() === 'status-warning' ? 'yellow' : 'red';
+                default:
+                    return 'green';
+            }
+        }
+
+        function populateEquipmentGrid() {
+            const grid = document.getElementById('equipment-grid');
+            if (!grid) return;
+
+            const equipment = [
+                { icon: '🔥', name: 'Szárító dob', status: 'running', temp: '185°C' },
+                { icon: '🥄', name: 'Keverő', status: 'running', temp: '165°C' },
+                { icon: '⚙️', name: 'Szárító motor', status: 'running', power: '132kW' },
+                { icon: '⚙️', name: 'Keverő motor', status: 'running', power: '250kW' },
+                { icon: '📦', name: 'Tárolók', status: 'running', count: '6 db' },
+                { icon: '🌡️', name: 'Hőmérséklet szenzorok', status: 'running', count: '12 db' },
+                { icon: '⏲️', name: 'Nyomás szenzorok', status: 'warning', count: '8 db' },
+                { icon: '⚖️', name: 'Mérlegek', status: 'running', accuracy: '±0.5%' }
+            ];
+
+            grid.innerHTML = equipment.map(item => `
+                <div class="equipment-card" onclick="selectEquipment('${item.name}')">
+                    <div class="equipment-icon">${item.icon}</div>
+                    <div class="equipment-name">${item.name}</div>
+                    <div class="equipment-status status-${item.status}">
+                        ${item.status === 'running' ? '✅ Üzemben' : 
+                          item.status === 'warning' ? '⚠️ Figyelem' : '❌ Leállva'}
+                    </div>
+                    <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
+                        ${item.temp || item.power || item.count || item.accuracy || ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectEquipment(name) {
+            showAlert(`🔧 Kiválasztva: ${name}`, 'info');
+        }
+
+        function selectProcess(step) {
+            const processes = {
+                1: {
+                    title: '📦 Tárolók és előkészítés',
+                    description: 'Adalékanyagok tárolása és előzetes osztályozása.',
+                    params: 'Kapacitás: 6×150t | Hőmérséklet: ambiente | Nedvesség: <3%'
+                },
+                2: {
+                    title: '⚖️ Adagolás és mérés',
+                    description: 'Precíz adagolás receptúra szerint.',
+                    params: 'Pontosság: ±0.5% | Ciklus: 90s | Automatikus: ✅'
+                },
+                3: {
+                    title: '🔥 Szárítás',
+                    description: 'Forgatott dobban 180°C-on szárítás.',
+                    params: 'Hőmérséklet: 180°C | Égő: 25MW | Kapacitás: 800t/h'
+                },
+                4: {
+                    title: '🥄 Keverés',
+                    description: 'Bitumennel történő homogén keverés.',
+                    params: 'Hőmérséklet: 165°C | Idő: 90s | Fordulatszám: 45rpm'
+                },
+                5: {
+                    title: '📦 Kirakás',
+                    description: 'Kész aszfaltkeverék szállítójárműbe rakása.',
+                    params: 'Hőmérséklet: 165°C | Automatikus: ✅ | Dokumentálás: ✅'
+                }
+            };
+
+            // Remove active class from all steps
+            document.querySelectorAll('.process-step').forEach(el => el.classList.remove('active'));
+            
+            // Add active class to selected step
+            event.target.classList.add('active');
+
+            const process = processes[step];
+            document.getElementById('process-title').textContent = process.title;
+            document.getElementById('process-description').textContent = process.description;
+            document.getElementById('process-params').textContent = process.params;
+        }
+
+        function checkAlerts() {
+            if (systemData.gasPresssure < 7.0) {
+                showAlert('🚨 Kritikus: Gáznyomás alacsony!', 'error');
+            } else if (systemData.gasPresssure < 7.5) {
+                showAlert('⚠️ Figyelmeztetés: Gáznyomás alacsony', 'warning');
+            }
+
+            if (systemData.temperature.dryer > 190) {
+                showAlert('🔥 Figyelmeztetés: Szárító túlmelegedés', 'warning');
+            }
+
+            if (systemData.production < 90) {
+                showAlert('📉 Információ: Alacsony termelési arány', 'info');
+            }
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertSystem = document.getElementById('alertSystem');
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.textContent = message;
+            
+            alertSystem.appendChild(alert);
+            
+            // Show alert
+            setTimeout(() => alert.classList.add('show'), 100);
+            
+            // Remove alert after 5 seconds
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => alertSystem.removeChild(alert), 400);
+            }, 5000);
+        }
+
+        function togglePanel() {
+            const panel = document.getElementById('realtimePanel');
+            panel.classList.toggle('collapsed');
+        }
+
+        // Control functions
+        function quickStart() {
+            showAlert('✅ Gyors indítás kezdeményezve', 'success');
+        }
+
+        function quickStop() {
+            showAlert('⏸️ Rendszer szüneteltetve', 'warning');
+        }
+
+        function emergencyStop() {
+            showAlert('🚨 VÉSZLEÁLLÍTÁS AKTIVÁLVA!', 'error');
+        }
+
+        function autoMode() {
+            showAlert('🤖 Automatikus mód aktiválva', 'success');
+        }
+
+        function saveSettings() {
+            showAlert('💾 Beállítások mentve', 'success');
+        }
+
+        function loadDefaults() {
+            showAlert('🔄 Alapértelmezett beállítások betöltve', 'info');
+        }
+
+        function exportConfig() {
+            showAlert('📤 Konfiguráció exportálva', 'success');
+        }
+
+        function importConfig() {
+            showAlert('📥 Konfiguráció importálva', 'success');
+        }
+
+        // Chart initialization functions
+        function initDashboardChart() {
+            const canvas = document.getElementById('dashboardChart');
+            if (canvas) {
+                charts.dashboard = canvas.getContext('2d');
+                drawSimpleChart(charts.dashboard, canvas);
+            }
+        }
+
+        function initMonitoringChart() {
+            const canvas = document.getElementById('monitoringChart');
+            if (canvas) {
+                charts.monitoring = canvas.getContext('2d');
+                drawSimpleChart(charts.monitoring, canvas);
+            }
+        }
+
+        function initAnalyticsChart() {
+            const canvas = document.getElementById('analyticsChart');
+            if (canvas) {
+                charts.analytics = canvas.getContext('2d');
+                drawSimpleChart(charts.analytics, canvas);
+            }
+        }
+
+        function drawSimpleChart(ctx, canvas) {
+            if (!ctx) return;
+            
+            const width = canvas.width = canvas.offsetWidth;
+            const height = canvas.height = canvas.offsetHeight;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Background
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Grid lines
+            ctx.strokeStyle = '#e9ecef';
+            ctx.lineWidth = 1;
+            
+            // Horizontal lines
+            for (let i = 0; i <= 10; i++) {
+                const y = (height / 10) * i;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Vertical lines
+            for (let i = 0; i <= 20; i++) {
+                const x = (width / 20) * i;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            // Generate sample data
+            const points = 50;
+            const dryerData = [];
+            const mixerData = [];
+            const productionData = [];
+            
+            for (let i = 0; i < points; i++) {
+                dryerData.push(180 + Math.sin(i * 0.1) * 8 + (Math.random() - 0.5) * 4);
+                mixerData.push(165 + Math.sin(i * 0.08) * 5 + (Math.random() - 0.5) * 3);
+                productionData.push(98 + Math.sin(i * 0.12) * 10 + (Math.random() - 0.5) * 5);
+            }
+            
+            // Draw temperature lines
+            drawLine(ctx, dryerData, '#e74c3c', width, height, 150, 200);
+            drawLine(ctx, mixerData, '#3498db', width, height, 150, 200);
+            
+            // Legend
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillText('Szárító hőmérséklet', 20, 30);
+            ctx.fillStyle = '#3498db';
+            ctx.fillText('Keverő hőmérséklet', 20, 50);
+            
+            // Current values
+            ctx.font = 'bold 16px Arial';
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillText(`Szárító: ${systemData.temperature.dryer.toFixed(1)}°C`, width - 200, 30);
+            ctx.fillText(`Keverő: ${systemData.temperature.mixer.toFixed(1)}°C`, width - 200, 50);
+            ctx.fillText(`Termelés: ${systemData.production.toFixed(1)} t/h`, width - 200, 70);
+        }
+
+        function drawLine(ctx, data, color, width, height, minVal, maxVal) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            for (let i = 0; i < data.length; i++) {
+                const x = (i / (data.length - 1)) * width;
+                const normalizedValue = (data[i] - minVal) / (maxVal - minVal);
+                const y = height - (normalizedValue * height);
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            
+            ctx.stroke();
+            
+            // Add gradient fill
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = color;
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        // Advanced monitoring functions
+        function startAdvancedMonitoring() {
+            // Vibration analysis simulation
+            const vibrationInterval = setInterval(() => {
+                const vibration = {
+                    dryer: 1.5 + Math.random() * 0.8,
+                    mixer: 2.1 + Math.random() * 1.0,
+                    conveyor: 0.8 + Math.random() * 0.4
+                };
+                
+                // Check for anomalies
+                if (vibration.dryer > 2.5) {
+                    showAlert('⚠️ Szárító dob: Magas vibráció észlelve', 'warning');
+                }
+                if (vibration.mixer > 3.5) {
+                    showAlert('⚠️ Keverő: Magas vibráció észlelve', 'warning');
+                }
+            }, 10000);
+            
+            updateIntervals.push(vibrationInterval);
+        }
+
+        function simulateProductionCycle() {
+            let cyclePhase = 0;
+            const phases = ['Töltés', 'Szárítás', 'Keverés', 'Kirakás', 'Várakozás'];
+            
+            const cycleInterval = setInterval(() => {
+                cyclePhase = (cyclePhase + 1) % phases.length;
+                const currentPhase = phases[cyclePhase];
+                
+                showAlert(`🔄 Termelési fázis: ${currentPhase}`, 'info');
+                
+                // Adjust parameters based on phase
+                switch(currentPhase) {
+                    case 'Töltés':
+                        systemData.production = 0;
+                        break;
+                    case 'Szárítás':
+                        systemData.production = 85;
+                        systemData.power = 2.0;
+                        break;
+                    case 'Keverés':
+                        systemData.production = 98;
+                        systemData.power = 1.9;
+                        break;
+                    case 'Kirakás':
+                        systemData.production = 105;
+                        systemData.power = 1.6;
+                        break;
+                    case 'Várakozás':
+                        systemData.production = 0;
+                        systemData.power = 1.2;
+                        break;
+                }
+            }, 15000);
+            
+            updateIntervals.push(cycleInterval);
+        }
+
+        function generateQualityReport() {
+            const report = {
+                date: new Date().toLocaleDateString('hu-HU'),
+                batches: Math.floor(Math.random() * 50) + 20,
+                temperature_variance: (Math.random() * 2 + 1).toFixed(1),
+                mix_uniformity: (Math.random() * 2 + 97).toFixed(1),
+                bitumen_content_variance: (Math.random() * 0.4 + 0.1).toFixed(2),
+                total_production: (Math.random() * 500 + 2000).toFixed(0)
+            };
+            
+            showAlert(`📊 Napi jelentés elkészült: ${report.batches} keverék, ${report.total_production}t`, 'success');
+            return report;
+        }
+
+        function predictiveMaintenance() {
+            const components = [
+                { name: 'Szárító motor csapágy', condition: 78, prediction: '2 hét' },
+                { name: 'Keverő lapátok', condition: 65, prediction: '1 hónap' },
+                { name: 'Szűrőzsákok', condition: 85, prediction: '3 hónap' },
+                { name: 'Égető fej', condition: 92, prediction: '6 hónap' }
+            ];
+            
+            components.forEach(comp => {
+                if (comp.condition < 70) {
+                    showAlert(`🔧 Karbantartás ajánlott: ${comp.name} (${comp.condition}%)`, 'warning');
+                }
+            });
+            
+            return components;
+        }
+
+        function energyOptimization() {
+            const currentEfficiency = systemData.efficiency;
+            const optimizationTips = [
+                'Szárító dob fordulatszám optimalizálása',
+                'Égő moduláció finomhangolása',
+                'Keverési idő csökkentése',
+                'Előmelegítési stratégia módosítása'
+            ];
+            
+            if (currentEfficiency < 92) {
+                const tip = optimizationTips[Math.floor(Math.random() * optimizationTips.length)];
+                showAlert(`💡 Optimalizálási javaslat: ${tip}`, 'info');
+            }
+        }
+
+        function environmentalMonitoring() {
+            const emissions = {
+                dust: 8.2, // mg/m³
+                nox: 95,   // mg/m³
+                co: 45,    // mg/m³
+                co2: 2.1   // kg/t
+            };
+            
+            // Check emission limits
+            if (emissions.dust > 10) {
+                showAlert('🌍 Porkibocsátás határérték közelében', 'warning');
+            }
+            if (emissions.nox > 100) {
+                showAlert('🌍 NOx kibocsátás magas', 'warning');
+            }
+            
+            return emissions;
+        }
+
+        function safetySystemCheck() {
+            const safetyItems = [
+                { name: 'Vészleállító rendszer', status: 'OK' },
+                { name: 'Gázérzékelők', status: 'OK' },
+                { name: 'Túlnyomás védelem', status: 'OK' },
+                { name: 'Hőmérséklet védelem', status: 'Figyelem' },
+                { name: 'Tűzvédelmi rendszer', status: 'OK' }
+            ];
+            
+            const warnings = safetyItems.filter(item => item.status !== 'OK');
+            if (warnings.length > 0) {
+                warnings.forEach(warning => {
+                    showAlert(`🛡️ Biztonsági figyelmeztetés: ${warning.name}`, 'warning');
+                });
+            }
+            
+            return safetyItems;
+        }
+
+        function remoteAccessLog() {
+            const accessLog = [
+                { time: '14:23:15', user: 'Operátor01', action: 'Setpoint módosítás', details: 'Szárító: 185°C' },
+                { time: '14:18:32', user: 'Karbantartó02', action: 'Diagnosztika', details: 'Motor vibráció ellenőrzés' },
+                { time: '14:05:47', user: 'Műszakvezető', action: 'Jelentés letöltés', details: 'Napi termelési adatok' },
+                { time: '13:52:18', user: 'Minőségirányító', action: 'Receptúra módosítás', details: 'Bitumen tartalom: 5.5%' }
+            ];
+            
+            return accessLog;
+        }
+
+        // Initialize advanced features
+        setTimeout(() => {
+            startAdvancedMonitoring();
+            simulateProductionCycle();
+            
+            // Run periodic checks
+            setInterval(() => {
+                predictiveMaintenance();
+                energyOptimization();
+                environmentalMonitoring();
+                safetySystemCheck();
+            }, 30000);
+            
+            // Generate daily report
+            setInterval(() => {
+                generateQualityReport();
+            }, 300000); // Every 5 minutes for demo
+            
+        }, 5000);
+
+        // Cleanup function
+        window.addEventListener('beforeunload', () => {
+            updateIntervals.forEach(interval => clearInterval(interval));
+        });
+
+        // Touch and mobile support
+        function handleTouchStart(evt) {
+            evt.preventDefault();
+        }
+
+        function handleTouchMove(evt) {
+            evt.preventDefault();
+        }
+
+        // Add touch event listeners for mobile devices
+        document.addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+        // Responsive chart handling
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                if (charts.dashboard) initDashboardChart();
+                if (charts.monitoring) initMonitoringChart();
+                if (charts.analytics) initAnalyticsChart();
+            }, 100);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        showTab('dashboard');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        showTab('monitoring');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        showTab('process');
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        saveSettings();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        emergencyStop();
+                        break;
+                }
+            }
+        });
+
+        // Export functions for external use
+        window.AsphaltMixerSystem = {
+            getData: () => systemData,
+            showAlert,
+            updateSystemData,
+            generateQualityReport,
+            predictiveMaintenance,
+            energyOptimization,
+            environmentalMonitoring,
+            safetySystemCheck,
+            remoteAccessLog
+        };
+
+        console.log('🎯 Enhanced Asphalt Mixer Control System loaded successfully');
+        console.log('📋 Available keyboard shortcuts:');
+        console.log('   Ctrl+1: Dashboard');
+        console.log('   Ctrl+2: Monitoring');
+        console.log('   Ctrl+3: Process');
+        console.log('   Ctrl+S: Save Settings');
+        console.log('   Ctrl+E: Emergency Stop');
+    </script>
+</body>
+</html>
